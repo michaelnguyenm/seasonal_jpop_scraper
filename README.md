@@ -1,7 +1,8 @@
 # seasonal-jpop-scraper
 Using Beautiful Soup 4 to rip anime data
-Current iteration scrapes from livechart.me
+
+Current version scrapes from livechart.me
 
 ## Dependencies
-1. Python 3.6
-2. BeautifulSoup4
+1. Python 3.4.3
+2. Beautiful Soup 4.4.0
