@@ -16,6 +16,11 @@ class Music:
         :return: returns nothing
         """
         self.title_jp = title_jp
+        self.title_en = None
+        self.title_rom = None
+        self.artist = []
+        self.release_date = None
+        self.music_links = []
 
 class Anime:
     """
@@ -33,5 +38,6 @@ class Anime:
         self.title_en = None
         self.title_rom = None
         self.title_other = []
-        self.title_date = None
+        self.airing_date = None
         self.music_list = []
+        self.anime_links = []
