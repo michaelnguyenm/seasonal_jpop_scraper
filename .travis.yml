@@ -11,5 +11,5 @@ install:
 script:
     - coverage run anime.py
     - coverage report -m
-    - coverage run scraper.py
+    - coverage run scraper.py >> out
     - coverage report -m

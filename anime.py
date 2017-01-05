@@ -17,7 +17,6 @@ class Music:
         """
         self.title_jp = title_jp
 
-
 class Anime:
     """
     Stores the information about this anime
@@ -31,3 +30,8 @@ class Anime:
         :return: returns nothing
         """
         self.title_jp = title_jp
+        self.title_en = None
+        self.title_rom = None
+        self.title_other = []
+        self.title_date = None
+        self.music_list = []
