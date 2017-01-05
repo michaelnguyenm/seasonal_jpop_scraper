@@ -9,7 +9,6 @@ install:
     - pip install -r requirements.txt
 
 script:
-    python3 test_anime.py \
     coverage run test_anime.py
 
 after_success:
