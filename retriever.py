@@ -7,6 +7,7 @@ import sys
 # Required to bypass browser checking on livechart
 USER_AGENT = {'User-Agent': 'Mozilla/5.0'}
 
+# Idea of making function from http://stackoverflow.com/questions/18160078/
 def parse_args(args):
     """
     Parses the args for use in the script
