@@ -13,3 +13,5 @@ script:
     - coverage report -m
     - coverage run scraper.py >> out
     - coverage report -m
+    - coverage run test_retriever.py
+    - coverage report -m
