@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 
 # Consider not hardcoding the file from the local directory
-soup = BeautifulSoup(open('test.html'), 'html.parser')
+soup = BeautifulSoup(open('anime.html'), 'html.parser')
 
 # interactive python3, use exec(open('scraper.py').read())
 
