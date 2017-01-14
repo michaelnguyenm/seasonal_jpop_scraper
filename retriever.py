@@ -35,17 +35,12 @@ def url_check(url):
     :param url: the URL to be checked
     :return: returns nothing
     """
-    """
-    match = ((url.find('https://www.livechart.me') != -1) or
-            (url.find('http://www.livechart.me') != -1) or
-            (url.find('https://livechart.me') != -1) or
-            (url.find('http://livechart.me') != -1))
-    """
     match = ((url.find('http://') != -1 or url.find('https://') != -1) and
             url.find('livechart.me') != -1)
     if not match:
         raise Exception("URL does not belong to livechart.me or missing http(s)")
 
+"""
 # Parse arguments
 args = parse_args(sys.argv[1:])
 
@@ -58,3 +53,4 @@ page = urllib.request.urlopen(request)
 out = open(args.file_name, "w+")
 out.write(page.read().decode('utf-8'))
 out.close()
+"""

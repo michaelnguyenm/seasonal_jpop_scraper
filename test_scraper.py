@@ -1,5 +1,6 @@
 import unittest
 import scraper
+from datetime import datetime
 
 class ScraperTests(unittest.TestCase):
 
@@ -14,6 +15,10 @@ class ScraperTests(unittest.TestCase):
     def test_get_adb_id_empty(self):
         adb_id = scraper.get_adb_id('')
         self.assertEqual(adb_id,'')
+
+    def test_formatted_airdate(self):
+        date = scraper.formatted_airdate('1970-01')
+        self.assertEqual(date, datetime(1970, 1, 1))
 
 if __name__ == '__main__':
     unittest.main()
