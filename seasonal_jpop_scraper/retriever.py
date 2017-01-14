@@ -40,17 +40,19 @@ def url_check(url):
     if not match:
         raise Exception("URL does not belong to livechart.me or missing http(s)")
 
-"""
-# Parse arguments
-args = parse_args(sys.argv[1:])
+def main():
+    # Parse arguments
+    args = parse_args(sys.argv[1:])
 
-# Check if livechart
-url_check(args.url)
+    # Check if livechart
+    url_check(args.url)
 
-# Based on: http://stackoverflow.com/questions/13055208/httperror-http-error-403-forbidden
-request = urllib.request.Request(args.url, headers=USER_AGENT)
-page = urllib.request.urlopen(request)
-out = open(args.file_name, "w+")
-out.write(page.read().decode('utf-8'))
-out.close()
-"""
+    # Based on: http://stackoverflow.com/questions/13055208/httperror-http-error-403-forbidden
+    request = urllib.request.Request(args.url, headers=USER_AGENT)
+    page = urllib.request.urlopen(request)
+    out = open(args.file_name, "w+")
+    out.write(page.read().decode('utf-8'))
+    out.close()
+
+if __name__ == '__main__':
+    main() 

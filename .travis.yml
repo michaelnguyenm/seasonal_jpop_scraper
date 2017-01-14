@@ -9,9 +9,5 @@ install:
     - pip install -r requirements.txt
 
 script:
-    - coverage run anime.py
-    - coverage report -m
-    - coverage run test_retriever.py
-    - coverage report -m
-    - coverage run test_scraper.py
+    - coverage run  --source seasonal_jpop_scraper setup.py test
     - coverage report -m

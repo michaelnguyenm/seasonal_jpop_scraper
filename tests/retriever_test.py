@@ -1,5 +1,5 @@
 import unittest
-import retriever
+from seasonal_jpop_scraper import retriever
 
 class RetrieverTests(unittest.TestCase):
 

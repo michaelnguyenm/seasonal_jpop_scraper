@@ -1,5 +1,5 @@
 import unittest
-import anime
+from seasonal_jpop_scraper import anime
 
 class AnimeTests(unittest.TestCase):
 

@@ -1,5 +1,5 @@
 import unittest
-import scraper
+from seasonal_jpop_scraper import scraper
 from datetime import datetime
 
 class ScraperTests(unittest.TestCase):
