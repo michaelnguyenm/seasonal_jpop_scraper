@@ -35,12 +35,6 @@ def url_check(url):
     :param url: the URL to be checked
     :return: returns nothing
     """
-    """
-    match = ((url.find('https://www.livechart.me') != -1) or
-            (url.find('http://www.livechart.me') != -1) or
-            (url.find('https://livechart.me') != -1) or
-            (url.find('http://livechart.me') != -1))
-    """
     match = ((url.find('http://') != -1 or url.find('https://') != -1) and
             url.find('livechart.me') != -1)
     if not match:
