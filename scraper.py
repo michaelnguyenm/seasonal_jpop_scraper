@@ -8,9 +8,9 @@ import time # Limit the number of requests
 
 # Based on: http://stackoverflow.com/questions/7894384/
 def get_adb_id(adb_link):
-    '''
+    """
     Function info
-    '''
+    """
     url = urlparse(adb_link)
     path = url.path
     split_path = os.path.split(path)
@@ -19,25 +19,25 @@ def get_adb_id(adb_link):
 
 # Based on: https://gist.github.com/Manouchehri/0ce55d239fb07c41c92f
 def get_adb_airdate(adb_id):
-    '''
+    """
     Function info
-    '''
+    """
     time.sleep(3)
     url = 'http://api.anidb.net:9001/httpapi?request=anime&client=seasonaljpop&clientver=1&protover=1&aid=' + adb_id
     header = {'Accept-Encoding' : 'gzip'}
     request = urllib.request.Request(url, headers=header)
     response = urllib.request.urlopen(request)
     data = gzip.decompress(response.read())
-    soup = BeautifulSoup(data)
+    soup = BeautifulSoup(data, 'html.parser')
     date = soup.startdate.contents[0]
     return date
 
 # Date given in string form
 # Based on: http://stackoverflow.com/questions/23581128/
 def formatted_airdate(date):
-    '''
+    """
     Function info
-    '''
+    """
     for fmt in ('%Y', '%Y-%m', '%Y-%m-%d'):
         try:
             return datetime.strptime(date, fmt)
@@ -70,6 +70,7 @@ for line in title_tag_list:
 
     # Get airdate
     # Process link for ID
+    """
     adb_id = get_adb_id(adb_link)
     airdate = None
     # Look up ID on anidb if it exists
@@ -78,7 +79,7 @@ for line in title_tag_list:
         # Process date string
         if (unformatted_airdate != '1970-01-01'):
             airdate = formatted_airdate(unformatted_airdate)
-
+    """
     # Add to anime database
     # Find music
     # Add to music database

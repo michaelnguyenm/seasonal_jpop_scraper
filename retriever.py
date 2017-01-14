@@ -40,6 +40,7 @@ def url_check(url):
     if not match:
         raise Exception("URL does not belong to livechart.me or missing http(s)")
 
+"""
 # Parse arguments
 args = parse_args(sys.argv[1:])
 
@@ -52,3 +53,4 @@ page = urllib.request.urlopen(request)
 out = open(args.file_name, "w+")
 out.write(page.read().decode('utf-8'))
 out.close()
+"""
