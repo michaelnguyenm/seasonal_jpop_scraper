@@ -1,3 +1,5 @@
+from enum import Enum
+
 """
 This module contains all the classes necessary to have information on a given
 anime and its associated artists and music
@@ -22,6 +24,11 @@ class Music:
         self.release_date = None
         self.music_links = []
 
+class AnimeLink(Enum):
+    mal = 1;
+    adb = 2;
+    kitsu = 3;
+
 class Anime:
     """
     Stores the information about this anime
@@ -40,15 +47,17 @@ class Anime:
         self.title_other = []
         self.airing_date = None
         self.music_list = []
-        self.anime_links = []
+        self.anime_links = {AnimeLink.mal:'',
+                            AnimeLink.adb:'',
+                            AnimeLink.kitsu: ''}
 
     def add_titles(self, tag):
         """
         Parses the given tag and adds the extra titles
         :param tag: the tag object with the extra titles
         """
-        self.title_rom = tag.get('data-romaji') if tag.get('data-romaji') != '' else None
-        self.title_en = tag.get('data-english') if tag.get('data-english') != '' else None
+        self.title_rom = tag.get('data-romaji')
+        self.title_en = tag.get('data-english')
         self.title_other = tag.get('data-alternate').split(',')
 
     def add_links(self, tag):
@@ -56,4 +65,12 @@ class Anime:
         Parses the given tag and adds the links
         :param tag: the tag object with the links
         """
-        return None
+        mal_tag = tag.find_next('a', {'class':'mal-icon'})
+        mal_link = '' if mal_tag == None else mal_tag.get('href')
+        self.anime_links[AnimeLink.mal] = mal_link
+        adb_tag = tag.find_next('a', {'class':'anidb-icon'})
+        adb_link = '' if adb_tag == None else adb_tag.get('href')
+        self.anime_links[AnimeLink.adb] = adb_link
+        kitsu_tag = tag.find_next('a', {'class':'kitsu-icon'})
+        kitsu_link = '' if kitsu_tag == None else kitsu_tag.get('href')
+        self.anime_links[AnimeLink.kitsu] = kitsu_link

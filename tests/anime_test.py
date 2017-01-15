@@ -11,7 +11,7 @@ class AnimeTests(unittest.TestCase):
         self.assertEqual(len(a.title_other), 0)
         self.assertEqual(a.airing_date, None)
         self.assertEqual(len(a.music_list), 0)
-        self.assertEqual(len(a.anime_links), 0)
+        self.assertEqual(len(a.anime_links), 3)
 
     def test_add_titles(self):
         self.assertTrue(True)
@@ -29,6 +29,11 @@ class MusicTests(unittest.TestCase):
         self.assertEqual(len(m.artist), 0)
         self.assertEqual(m.release_date, None)
         self.assertEqual(len(m.music_links), 0)
+
+class AnimeLinkTests(unittest.TestCase):
+
+    def test_enums(self):
+        self.assertTrue(True)
 
 if __name__ == '__main__':
     unittest.main()
