@@ -41,3 +41,19 @@ class Anime:
         self.airing_date = None
         self.music_list = []
         self.anime_links = []
+
+    def add_titles(self, tag):
+        """
+        Parses the given tag and adds the extra titles
+        :param tag: the tag object with the extra titles
+        """
+        self.title_rom = tag.get('data-romaji') if tag.get('data-romaji') != '' else None
+        self.title_en = tag.get('data-english') if tag.get('data-english') != '' else None
+        self.title_other = tag.get('data-alternate').split(',')
+
+    def add_links(self, tag):
+        """
+        Parses the given tag and adds the links
+        :param tag: the tag object with the links
+        """
+        return None

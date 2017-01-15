@@ -1,5 +1,4 @@
 ## Requirements without version specifiers ##
-requests
 pymongo
 beautifulsoup4
 coverage

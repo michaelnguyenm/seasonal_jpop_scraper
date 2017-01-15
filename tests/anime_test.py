@@ -13,6 +13,12 @@ class AnimeTests(unittest.TestCase):
         self.assertEqual(len(a.music_list), 0)
         self.assertEqual(len(a.anime_links), 0)
 
+    def test_add_titles(self):
+        self.assertTrue(True)
+
+    def test_add_links(self):
+        self.assertTrue(True)
+
 class MusicTests(unittest.TestCase):
 
     def test_title_only(self):
