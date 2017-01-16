@@ -61,6 +61,7 @@ def formatted_airdate(date):
 
 def main():
     import anime
+    from anime import AnimeLink
     # Consider not hardcoding the file from the local directory
     soup = BeautifulSoup(open('anime.html'), 'html.parser')
     title_tag_list = soup.find_all('h3')
@@ -72,19 +73,16 @@ def main():
 
         # from http://stackoverflow.com/questions/2612548/
         # Get names
-        anime_data = anime.Anime(title_tag.get('data-japanese'))
+        anime_data = anime.Anime(title_tag)
         anime_data.add_titles(title_tag)
 
         # Get links
         # Need to make tests for when these classes don't exist
         anime_data.add_links(title_tag)
-        mal_link = title_tag.find_next('a', {'class':'mal-icon'}).get('href')
-        adb_link = title_tag.find_next('a', {'class':'anidb-icon'}).get('href')
 
-        """
         # Get airdate
         # Process link for ID
-        adb_id = get_adb_id(adb_link)
+        adb_id = get_adb_id(anime_data.links[AnimeLink.adb])
         airdate = None
         # Look up ID on anidb if it exists
         if (adb_id != ''):
@@ -93,10 +91,11 @@ def main():
             # Process date string
             if (unformatted_airdate != '1970-01-01'):
                 airdate = formatted_airdate(unformatted_airdate)
+
+        break
         # Add to anime database
         # Find music
         # Add to music database
-        """
 
 if __name__ == '__main__':
     main()

@@ -5,6 +5,10 @@ This module contains all the classes necessary to have information on a given
 anime and its associated artists and music
 """
 
+class MusicLink(Enum):
+    amazon = 1;
+    vgmdb = 2;
+
 class Music:
     """
     Stores the information about a given music object
@@ -22,7 +26,7 @@ class Music:
         self.title_rom = None
         self.artist = []
         self.release_date = None
-        self.music_links = []
+        self.links = []
 
 class AnimeLink(Enum):
     mal = 1;
@@ -35,21 +39,21 @@ class Anime:
     Requires at least a title in Japanese
     """
 
-    def __init__(self, title_jp):
+    def __init__(self, tag):
         """
         Constructs a new 'Anime' object
         :param title_jp: The title of the anime in Japanese
         :return: returns nothing
         """
-        self.title_jp = title_jp
+        self.title_jp = tag.get('data-japanese')
         self.title_en = None
         self.title_rom = None
         self.title_other = []
         self.airing_date = None
         self.music_list = []
-        self.anime_links = {AnimeLink.mal:'',
-                            AnimeLink.adb:'',
-                            AnimeLink.kitsu: ''}
+        self.links = {AnimeLink.mal:'',
+                      AnimeLink.adb:'',
+                      AnimeLink.kitsu: ''}
 
     def add_titles(self, tag):
         """
@@ -67,10 +71,10 @@ class Anime:
         """
         mal_tag = tag.find_next('a', {'class':'mal-icon'})
         mal_link = '' if mal_tag == None else mal_tag.get('href')
-        self.anime_links[AnimeLink.mal] = mal_link
+        self.links[AnimeLink.mal] = mal_link
         adb_tag = tag.find_next('a', {'class':'anidb-icon'})
         adb_link = '' if adb_tag == None else adb_tag.get('href')
-        self.anime_links[AnimeLink.adb] = adb_link
+        self.links[AnimeLink.adb] = adb_link
         kitsu_tag = tag.find_next('a', {'class':'kitsu-icon'})
         kitsu_link = '' if kitsu_tag == None else kitsu_tag.get('href')
-        self.anime_links[AnimeLink.kitsu] = kitsu_link
+        self.links[AnimeLink.kitsu] = kitsu_link
