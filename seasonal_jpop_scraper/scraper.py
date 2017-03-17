@@ -5,6 +5,7 @@ import urllib.request # Requests XML that has been compressed
 import gzip
 from datetime import datetime # Used to format datetime for mongodb
 import time # Limit the number of requests
+import pickle # For moving data to a file to be manipulated later
 
 # Based on: http://stackoverflow.com/questions/7894384/
 def get_adb_id(adb_link):
@@ -59,12 +60,21 @@ def formatted_airdate(date):
             pass
     raise ValueError('Date does not match formats expected')
 
+def pickle_anime(data):
+    """
+    Uses the data in the form of a list of anime objects
+    and makes it into a pickle file
+    :param data: the anime list
+    """
+    pickle.dump(data, open("save_anime.p", "wb"))
+
 def main():
     import anime
     from anime import AnimeLink
     # Consider not hardcoding the file from the local directory
     soup = BeautifulSoup(open('anime.html'), 'html.parser')
     title_tag_list = soup.find_all('h3')
+    anime_list = []
     for title_tag in title_tag_list:
         # Entire tag
         # print(line)
@@ -91,11 +101,15 @@ def main():
             # Process date string
             if (unformatted_airdate != '1970-01-01'):
                 airdate = formatted_airdate(unformatted_airdate)
-
-        break
-        # Add to anime database
+        # Add airdate to anime object
+        anime_data.airing_date = airdate
         # Find music
         # Add to music database
+        # Add to anime list
+        anime_list.append(anime_data)
+        break
+    # Export to pickle file
+    pickle_anime(anime_list)
 
 if __name__ == '__main__':
     main()
