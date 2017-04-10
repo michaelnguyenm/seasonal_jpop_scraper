@@ -215,7 +215,7 @@ def main():
             music_list = process_vgmdb_music(anime_data, raw_music_list)
 
         # If music_list is empty, try alternatives
-        if (len(music_list) == 0):
+        # if (len(music_list) == 0):
             # Need to handle second season stuff
             # Try English instead
             # Search CDJapan
