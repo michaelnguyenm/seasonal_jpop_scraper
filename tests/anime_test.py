@@ -29,9 +29,10 @@ class MusicTests(unittest.TestCase):
         self.assertEqual(m.title_jp, 'COLORS')
         self.assertEqual(m.title_en, None)
         self.assertEqual(m.title_rom, None)
+        self.assertEqual(m.catalog, None)
         self.assertEqual(len(m.artist), 0)
         self.assertEqual(m.release_date, None)
-        self.assertEqual(len(m.links), 0)
+        self.assertEqual(len(m.links), 2)
 
 class AnimeLinkTests(unittest.TestCase):
 

@@ -47,7 +47,7 @@ def get_adb_airdate(data):
 
 # Date given in string form
 # Based on: http://stackoverflow.com/questions/23581128/
-def formatted_airdate(date):
+def formatted_date(date):
     """
     Processes the date in the form of a string
     :param date: the date represented as a string
@@ -59,6 +59,108 @@ def formatted_airdate(date):
         except ValueError:
             pass
     raise ValueError('Date does not match formats expected')
+
+def get_vgmdb_music(anime_data):
+    """
+    Uses the anime data to make a request to vgmdb
+    to find music information and pass the appropriate json
+    data to get_music()
+    http://stackoverflow.com/questions/32795460/loading-json-object-in-python-using-urllib-request-and-json-modules
+    :param anime_data: the anime data object which holds title information
+    :return: the list of products for this anime
+    """
+    import urllib.request
+    import urllib.parse
+    import json
+    product_list = []
+    time.sleep(2)
+    title_jp = anime_data.title_jp
+    search_url = 'http://vgmdb.info/search/' + urllib.parse.quote(title_jp) + '?format=json'
+    print ('HANDLING', search_url)
+    search_request = urllib.request.Request(search_url)
+    search_page = urllib.request.urlopen(search_request)
+    search_data = search_page.read()
+    encoding = search_page.info().get_content_charset('utf-8')
+    # Error check json?
+    search_json = json.loads(search_data.decode(encoding))
+    search_product_link = None
+    try:
+        # Assumes that the product[0] is good
+        search_product_link = search_json['results']['products'][0]['link']
+    except IndexError:
+        # Return none? NO PRODUCT ;-;
+        print ('GetVgmdbWarning: There was no product found for:', title_jp)
+        return search_json['results']['albums']
+        return product_list
+    # Now get product json, assuming there is always a product url
+    time.sleep(2)
+    product_url = 'http://vgmdb.info/' + search_product_link + '?format=json'
+    product_request = urllib.request.Request(product_url)
+    product_page = urllib.request.urlopen(product_request)
+    product_data = product_page.read()
+    product_json = json.loads(product_data.decode(encoding))
+    product_list = product_json['albums']
+    return product_list
+
+def process_vgmdb_music(anime_data, music_list):
+    import anime
+    from anime import MusicLink
+    processed_list = []
+    for music in music_list:
+        product_list_found = True
+        music_data = None
+        # Check date first
+        unformatted_date = None
+        try:
+            unformatted_date = music['date']
+        except KeyError:
+            # Means a product_list was not found
+            print ('ProcessVgmdbWarning: No product_list found, using release_date comparison')
+            product_list_found = False
+            try:
+                unformatted_date = music['release_date']
+            except KeyError:
+                # No release_date was found so skip this
+                print ('ProcessVgmdbWarning: No release_date found, skipping')
+                continue
+        release_date = formatted_date(unformatted_date)
+        if (product_list_found or ((not product_list_found) and (anime_data.airing_date != None) and (anime_data.airing_date <= release_date))):
+            # Ensure that at least one value is in the title field
+            for title in ['en', 'ja-latn', 'ja']:
+                try:
+                    music_data = anime.Music(music['titles'][title])
+                except KeyError:
+                    pass
+            # Get other titles
+            try:
+                music_data.title_en = music['titles']['en']
+                music_data.title_rom = music['titles']['ja-latn']
+            except KeyError:
+                pass
+            # Get catalog
+            music_data.catalog = music['catalog']
+            # Get date
+            try:
+                music_data.release_date = formatted_date(music['date'])
+            except KeyError:
+                print ('ProcessVgmdbWarning: Found a song with greater date')
+                music_data.release_date = formatted_date(music['release_date'])
+                pass
+            # Get link
+            music_data.links[MusicLink.vgmdb] = 'http://vgmdb.net/' + music['link']
+            # Get classifications?
+            """
+            {
+                "classifications": [
+                    "Vocal",
+                    "OP/ED/Insert"
+                ]
+            """
+            # Add to processed_list
+            processed_list.append(music_data)
+    return processed_list
+
+#def get_cdjapan_music(anime_data):
 
 def pickle_anime(data):
     """
@@ -100,14 +202,30 @@ def main():
             unformatted_airdate = get_adb_airdate(data)
             # Process date string
             if (unformatted_airdate != '1970-01-01'):
-                airdate = formatted_airdate(unformatted_airdate)
+                airdate = formatted_date(unformatted_airdate)
         # Add airdate to anime object
         anime_data.airing_date = airdate
-        # Find music
+
+        # Find music on vgmdb
+        # Current implementation assumes that a product can be found
+        raw_music_list = get_vgmdb_music(anime_data)
+        # Process list and add it to the anime_data
+        music_list = []
+        if (raw_music_list != None):
+            music_list = process_vgmdb_music(anime_data, raw_music_list)
+
+        # If music_list is empty, try alternatives
+        if (len(music_list) == 0):
+            # Need to handle second season stuff
+            # Try English instead
+            # Search CDJapan
+
+        anime_data.music_list = music_list
         # Add to music database
+
         # Add to anime list
         anime_list.append(anime_data)
-        break
+        # break
     # Export to pickle file
     pickle_anime(anime_list)
 

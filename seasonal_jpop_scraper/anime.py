@@ -24,9 +24,11 @@ class Music:
         self.title_jp = title_jp
         self.title_en = None
         self.title_rom = None
+        self.catalog = None
         self.artist = []
         self.release_date = None
-        self.links = []
+        self.links = {MusicLink.amazon:'',
+                      MusicLink.vgmdb:''}
 
 class AnimeLink(Enum):
     mal = 1;

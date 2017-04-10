@@ -19,8 +19,8 @@ class ScraperTests(unittest.TestCase):
     def test_get_adb_airdate(self):
         self.assertTrue(True)
 
-    def test_formatted_airdate(self):
-        date = scraper.formatted_airdate('1970-01')
+    def test_formatted_date(self):
+        date = scraper.formatted_date('1970-01')
         self.assertEqual(date, datetime(1970, 1, 1))
 
 if __name__ == '__main__':
