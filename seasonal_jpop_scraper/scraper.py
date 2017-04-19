@@ -60,6 +60,57 @@ def formatted_date(date):
             pass
     raise ValueError('Date does not match formats expected')
 
+def closest_product(anime_data, products_list):
+    """
+    Finds the closest product out of the entire list and returns the
+    album link associated with the closest product
+    :param anime_data: The given anime_data's date will be used to compare
+    :param products_list: The list of products that must be checked
+    :return: The album list for the closest product
+    """
+    import urllib.request
+    import json
+
+    highest_ratio = 0.0
+    closest_result = []
+    airing_date = anime_data.airing_date
+    # If no date in anime_data, return []
+    if (airing_date == None):
+        return closest_result
+    # Iterate through all of the products
+    for i in range(0, len(products_list)):
+        hits = 0.0
+        # Get the link for the current product
+        current_product_link = products_list[i]['link']
+        # Get the json file for the current product
+        time.sleep(2)
+        url = 'http://vgmdb.info/' + current_product_link + '?format=json'
+        request = urllib.request.Request(url)
+        page = urllib.request.urlopen(request)
+        data = page.read()
+        encoding = page.info().get_content_charset('utf-8')
+        json_file = json.loads(data.decode(encoding))
+        # Get the list of albums for this product and iterate
+        album_list = json_file['albums']
+        # Skip this album_list if there are no albums
+        if (len(album_list) == 0):
+            continue
+        # Iterate through album list
+        for album in album_list:
+            unformatted_date = None
+            try:
+                unformatted_date = album['date']
+            except KeyError:
+                continue
+            date = formatted_date(unformatted_date)
+            if (airing_date <= date):
+                hits += 1.0
+        ratio = hits / len(album_list)
+        if (ratio > highest_ratio):
+            closest_result = album_list
+            highest_ratio = ratio
+    return closest_result
+
 def get_vgmdb_music(anime_data):
     """
     Uses the anime data to make a request to vgmdb
@@ -72,11 +123,12 @@ def get_vgmdb_music(anime_data):
     import urllib.request
     import urllib.parse
     import json
+
     product_list = []
     time.sleep(2)
     title_jp = anime_data.title_jp
     search_url = 'http://vgmdb.info/search/' + urllib.parse.quote(title_jp) + '?format=json'
-    print ('HANDLING', search_url)
+    print ('GetVgmdbHandle:', search_url)
     search_request = urllib.request.Request(search_url)
     search_page = urllib.request.urlopen(search_request)
     search_data = search_page.read()
@@ -87,6 +139,10 @@ def get_vgmdb_music(anime_data):
     try:
         # Assumes that the product[0] is good
         search_product_link = search_json['results']['products'][0]['link']
+        size = len(search_json['results']['products'])
+        if (size > 1):
+            print ('GetVgmdbWarning: Number of products is', len(search_json['results']['products']), 'Finding closest match.')
+            return closest_product(anime_data, search_json['results']['products'])
     except IndexError:
         # Return none? NO PRODUCT ;-;
         print ('GetVgmdbWarning: There was no product found for:', title_jp)
@@ -103,20 +159,29 @@ def get_vgmdb_music(anime_data):
     return product_list
 
 def process_vgmdb_music(anime_data, music_list):
+    """
+    Processes the list of albums and creates a new list of music objects
+    :param anime_data: The anime associated with this list of music
+    :param music_list: The raw list of music that needs to be processed
+    :return processed_list: The list of processed albums
+    """
     import anime
     from anime import MusicLink
+
     processed_list = []
+    product_list_found = True
     for music in music_list:
-        product_list_found = True
+        # product_list_found = True
         music_data = None
         # Check date first
         unformatted_date = None
         try:
             unformatted_date = music['date']
         except KeyError:
-            # Means a product_list was not found
-            print ('ProcessVgmdbWarning: No product_list found, using release_date comparison')
-            product_list_found = False
+            # Means a product_list was not found earlier for whole music_list
+            if (product_list_found):
+                print ('ProcessVgmdbWarning: No product_list found, using release_date comparison')
+                product_list_found = False
             try:
                 unformatted_date = music['release_date']
             except KeyError:
@@ -211,10 +276,10 @@ def main():
         raw_music_list = get_vgmdb_music(anime_data)
         # Process list and add it to the anime_data
         music_list = []
-        if (raw_music_list != None):
+        if (len(raw_music_list) > 0):
             music_list = process_vgmdb_music(anime_data, raw_music_list)
 
-        # If music_list is empty, try alternatives
+        # If music_list is empty, try alternatives (more aggressive)
         # if (len(music_list) == 0):
             # Need to handle second season stuff
             # Try English instead
