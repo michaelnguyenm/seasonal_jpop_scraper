@@ -83,7 +83,7 @@ def closest_product(anime_data, products_list):
         # Get the link for the current product
         current_product_link = products_list[i]['link']
         # Get the json file for the current product
-        time.sleep(2)
+        time.sleep(3)
         url = 'http://vgmdb.info/' + current_product_link + '?format=json'
         request = urllib.request.Request(url)
         page = urllib.request.urlopen(request)

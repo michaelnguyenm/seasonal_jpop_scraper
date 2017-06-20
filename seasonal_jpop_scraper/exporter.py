@@ -4,52 +4,71 @@ from anime import MusicLink
 from anime import Anime
 from anime import Music
 from pymongo import MongoClient
-from datetime import datetime
+import datetime as dt
 
 def unpickle_anime():
     anime_list = pickle.load(open("save_anime.p", "rb"))
-    print('There is/are', len(anime_list), 'element(s) in the unpickled list.')
+    total_music = 0
     for anime_obj in anime_list:
         print('ANIME:', anime_obj.title_jp)
         for music_obj in anime_obj.music_list:
+            total_music += 1
             print('MUSIC:', music_obj.title_jp)
+            print('LINK:', music_obj.links[MusicLink.vgmdb])
+    print('There is/are', len(anime_list), 'element(s) in the unpickled list.')
+    print('There is/are', total_music, 'music in the unpickled list.')
     return anime_list
+
+# http://stackoverflow.com/questions/765797/python-timedelta-in-years
+def years_ago(years, from_date=None):
+    if from_date is None:
+        from_date = dt.now()
+    try:
+        return from_date.replace(year=from_date.year - years)
+    except ValueError:
+        # Must be 2/29!
+        assert from_date.month == 2 and from_date.day == 29 # can be removed
+        return from_date.replace(month=2, day=28, year=from_date.year-years)
+
+def num_years(begin, end=None):
+    if end is None:
+        end = dt.now()
+    num_years = int((end - begin).days / 365.2425)
+    if begin > years_ago(num_years, end):
+        return num_years - 1
+    else:
+        return num_years
+
+def date_to_season(date):
+    """
+    result = 0
+    # Need to determine years ago from 2016-12-01
+    year_diff = num_years(dt.datetime(2016, 12, 1), date)
+    result += year_diff * 4
+    """
+    # Need to calculate season
+    if(dt.datetime(date.year - 1, 12, 1) <= date and dt.datetime(date.year, 3, 1) > date):
+        return '0'
+    elif(dt.datetime(date.year, 3, 1) <= date and dt.datetime(date.year, 6, 1) > date):
+        return '1'
+    elif(dt.datetime(date.year, 6, 1) <= date and dt.datetime(date.year, 9, 1) > date):
+        return '2'
+    else:
+        return '3'
 
 def main():
     anime_list = unpickle_anime()
 
+    # Connect to mongodb
     connection = "mongodb://192.168.99.100:32768"
     client = MongoClient(connection)
     seasonal_jpop = client.seasonal_jpop
-    """
-    result = db.restaurants.insert_one(
-        {
-            "address": {
-                "street": "2 Avenue",
-                "zipcode": "10075",
-                "building": "1480",
-                "coord": [-73.9557413, 40.7720266]
-            },
-            "borough": "Manhattan",
-            "cuisine": "Italian",
-            "grades": [
-                {
-                    "date": datetime.strptime("2014-10-01", "%Y-%m-%d"),
-                    "grade": "A",
-                    "score": 11
-                },
-                {
-                    "date": datetime.strptime("2014-01-16", "%Y-%m-%d"),
-                    "grade": "B",
-                    "score": 17
-                }
-            ],
-            "name": "Vella",
-            "restaurant_id": "41704620"
-        }
-    )
-    """
+
+    # Iterate through anime_list
+    music_total_list = 0
+    music_total_upserts = 0
     for anime_obj in anime_list:
+        # Process Music in anime
         music_list = []
         for music_obj in anime_obj.music_list:
             music_entry =   {
@@ -64,30 +83,54 @@ def main():
                                     "vgmdb": music_obj.links[MusicLink.vgmdb]
                                 }
                             }
-            result = seasonal_jpop.music.insert_one(music_entry);
-            music_list.append(result.inserted_id)
-        result = seasonal_jpop.anime.insert_one(
-            {
-                "title_jp": anime_obj.title_jp,
-                "title_en": anime_obj.title_en,
-                "title_rom": anime_obj.title_rom,
-                "title_other": anime_obj.title_other,
-                "airing_date": anime_obj.airing_date,
-                "music_list": music_list,
-                "links": {
-                    "mal": anime_obj.links[AnimeLink.mal],
-                    "adb": anime_obj.links[AnimeLink.adb],
-                    "kitsu": anime_obj.links[AnimeLink.kitsu]
-                }
-            }
-        )
-        print(result.inserted_id)
+            music_result = seasonal_jpop.music.update_one({"title_jp": music_obj.title_jp}, {'$set': music_entry}, upsert = True)
+            # Causes problems with ensuring that all music gets added to the music list for a given anime
+            # Not everything has an upserted_id
+            if(music_result.upserted_id != None):
+                music_list.append(music_result.upserted_id)
+                music_total_upserts += 1
+            '''
+            else:
+                music_result = seasonal_jpop.music.find_one({"title_jp": music_obj.title_jp})['_id']
+                music_list.append(music_result)
+            '''
+        music_total_list += len(anime_obj.music_list)
+        # Process Anime
+        anime_entry =   {
+                            "title_jp": anime_obj.title_jp,
+                            "title_en": anime_obj.title_en,
+                            "title_rom": anime_obj.title_rom,
+                            "title_other": anime_obj.title_other,
+                            "airing_date": anime_obj.airing_date,
+                            "music_list": music_list,
+                            "links": {
+                                "mal": anime_obj.links[AnimeLink.mal],
+                                "adb": anime_obj.links[AnimeLink.adb],
+                                "kitsu": anime_obj.links[AnimeLink.kitsu]
+                            }
+                        }
+        anime_result = seasonal_jpop.anime.update_one({"title_jp": anime_obj.title_jp}, {'$set': anime_entry}, upsert = True)
+        # print(anime_result.inserted_id)
+        # Insert anime into correct year/seasonal_jpop
+        # Check if None
+        anime_date = anime_obj.airing_date
+        anime_season = date_to_season(anime_date)
+        if(anime_result.upserted_id != None):
+            season_result = seasonal_jpop.seasons.update_one({"year": anime_date.year}, {'$push': {anime_season: anime_result.upserted_id}}, upsert = True)
+
+    '''
+    import pprint
+    for entry in seasonal_jpop.anime.find():
+        pprint.pprint(entry)
+    '''
+    print('There are', music_total_upserts, '/', music_total_list, 'music objects in anime objects')
 
 if __name__ == '__main__':
     main()
 
 """
 Season
+result = seasonal_jpop.seasons.update_one({'year': '2017'},{'$push': {'0': 'test'}}, upsert=True)
 {
     1: [List of anime],
     2: [...],
