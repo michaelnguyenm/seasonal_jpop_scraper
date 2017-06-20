@@ -17,11 +17,11 @@ def parse_args(args):
     parser = argparse.ArgumentParser(
         description='Retrieves html file from a livechart link (requires http(s))'
     )
-    parser.add_argument('-u', action="store",
+    parser.add_argument('-u', action='store',
                         dest='url',
                         default='https://www.livechart.me/',
                         help='A URL belonging to livechart to retrieve')
-    parser.add_argument('-o', action="store",
+    parser.add_argument('-o', action='store',
                         dest='file_name',
                         default='anime.html',
                         help='An output file name')
@@ -38,7 +38,7 @@ def url_check(url):
     match = ((url.find('http://') != -1 or url.find('https://') != -1) and
             url.find('livechart.me') != -1)
     if not match:
-        raise Exception("URL does not belong to livechart.me or missing http(s)")
+        raise Exception('URL does not belong to livechart.me or missing http(s)')
 
 def main():
     # Parse arguments
@@ -55,4 +55,4 @@ def main():
     out.close()
 
 if __name__ == '__main__':
-    main() 
+    main()

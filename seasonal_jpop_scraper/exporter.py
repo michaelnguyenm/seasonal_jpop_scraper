@@ -1,4 +1,3 @@
-import pickle
 from anime import AnimeLink
 from anime import MusicLink
 from anime import Anime
@@ -6,8 +5,35 @@ from anime import Music
 from pymongo import MongoClient
 import datetime as dt
 
-def unpickle_anime():
-    anime_list = pickle.load(open("save_anime.p", "rb"))
+def parse_args(args):
+    """
+    Parses the args for use in the script
+    :param args: The arguments in a list
+    :return: returns arguments that have been parse
+    """
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description='Exports the pickle file to mongodb'
+    )
+    parser.add_argument('-m', action='store',
+                        dest='addr',
+                        default='localhost:27017',
+                        help='A mongodb address')
+    parser.add_argument('-p', action='store',
+                        dest='file_name',
+                        default='save_anime.p',
+                        help='An input pickle file')
+    return parser.parse_args(args)
+
+def unpickle_anime(file_name):
+    """
+    Takes in a file name to load a pickle file as a list
+    :param file_name: The file name of the pickle file
+    :return: returns the list in this pickle file
+    """
+    import pickle
+    anime_list = pickle.load(open(file_name, "rb"))
     total_music = 0
     for anime_obj in anime_list:
         print('ANIME:', anime_obj.title_jp)
@@ -57,11 +83,19 @@ def date_to_season(date):
         return '3'
 
 def main():
-    anime_list = unpickle_anime()
+    import sys
+
+    # Parse arguments
+    args = parse_args(sys.argv[1:])
+
+    # Check if mongodb
+    # url_check(args.addr)
+    # mongodb://192.168.99.100:32768/
+
+    anime_list = unpickle_anime(args.file_name)
 
     # Connect to mongodb
-    connection = "mongodb://192.168.99.100:32768"
-    client = MongoClient(connection)
+    client = MongoClient(args.addr)
     seasonal_jpop = client.seasonal_jpop
 
     # Iterate through anime_list
